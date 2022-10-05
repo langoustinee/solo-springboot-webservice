@@ -88,7 +88,6 @@ public class PostsApiControllerTest {
 
         HttpEntity<PostsUpdateRequestDto> requestEntity = new HttpEntity<>(requestDto);
 
-
         //when
         ResponseEntity<Long> responseEntity = restTemplate.exchange(url, HttpMethod.PUT, requestEntity, Long.class);
 
@@ -100,5 +99,10 @@ public class PostsApiControllerTest {
         assertThat(all_list.get(0).getTitle()).isEqualTo(expectedTitle);
         assertThat(all_list.get(0).getContent()).isEqualTo(expectedContent);
 
+    }
+
+    @Test
+    public void Posts_삭제() {
+        // 삭제 테스트를 따로 만들어보자.
     }
 }
