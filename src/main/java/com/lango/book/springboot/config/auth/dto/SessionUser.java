@@ -10,9 +10,9 @@ public class SessionUser {
     private String email;
     private String picture;
 
-    public SessionUser(User uuer) {
-        this.name = getName();
-        this.email = getEmail();
-        this.picture = getPicture();
+    public SessionUser(User user) {
+        this.name = user.getName();
+        this.email = user.getEmail();
+        this.picture = user.getPicture();
     }
 }
