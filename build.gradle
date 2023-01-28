@@ -26,7 +26,6 @@ repositories {
 
 dependencies {
     implementation 'org.projectlombok:lombok:1.18.22'
-
     // 그래들 가장 최신 버전은 7.4이고, 아래 메소드를 사용하려면 그래들 버전을 4.x 버전으로 변경해서 사용해야 한다.
     compile('org.springframework.boot:spring-boot-starter-web')
     compile('org.projectlombok:lombok')
@@ -34,5 +33,6 @@ dependencies {
     compile('com.h2database:h2')
     compile('org.springframework.boot:spring-boot-starter-mustache')
     compile('org.springframework.boot:spring-boot-starter-oauth2-client')
+    compile('org.springframework.session:spring-session-jdbc')
     testCompile('org.springframework.boot:spring-boot-starter-test')
 }

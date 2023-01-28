@@ -1,6 +1,5 @@
 package com.lango.book.springboot.domain.posts;
 
-import javafx.geometry.Pos;
 import org.junit.After;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -62,10 +61,10 @@ public class PostRepositoryTest {
         //then
         Posts posts = all_list.get(0);
 
-        System.out.println("createdDate:" + posts.getCreatedDate() + " modiftedDate:" + posts.getModifyedDate());
+        System.out.println("createdDate:" + posts.getCreatedDate() + " modifiedDate:" + posts.getModifiedDate());
 
         assertThat(posts.getCreatedDate()).isAfter(now);
-        assertThat(posts.getModifyedDate()).isAfter(now);
+        assertThat(posts.getModifiedDate()).isAfter(now);
 
     }
 }

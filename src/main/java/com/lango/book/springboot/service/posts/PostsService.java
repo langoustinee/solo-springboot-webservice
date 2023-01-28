@@ -6,7 +6,6 @@ import com.lango.book.springboot.web.dto.PostsListResponseDto;
 import com.lango.book.springboot.web.dto.PostsResponseDto;
 import com.lango.book.springboot.web.dto.PostsSaveRequestDto;
 import com.lango.book.springboot.web.dto.PostsUpdateRequestDto;
-import javafx.geometry.Pos;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
