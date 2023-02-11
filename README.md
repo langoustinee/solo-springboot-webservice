@@ -184,3 +184,96 @@ EX) @Query("SELECT p FROM Posts p ORDER BY p.id DESC")
 해당 옵션은 트랜잭션 범위는 유지하되 조회 기능만 동작하여 조회 속도가 빠르기에 **등록,수정,삭제 기능이 없는 서비스 메소드에서 사용**하면 좋다.
 
 
+<br><br><br>
+
+## Chapter 05
+### 1. Spring Security
+#### Spring Security(스프링 시큐리티)란?
+스프링 시큐리티는 인증(Authentication) 및 인가(Authorization) 기능을 가지는 프레임워크이다. 스프잉 기반의 애플리케이션을 개발할 때 보안을 위한 표준이라고 볼 수 있다.
+
+### 2. Spring Security with OAuth2 Login
+#### Spring Security를 이용한 소셜 로그인 OAuth2
+OAuth2를 통한 소셜 로그인을 사용하는 이유는 비밀번호를 찾거나 변경할 때, 그리고 회원정보를 변경하거나 로그인시 보안적인 이슈에 대해서 신경쓰지 않아도 되기 때문이다.
+
+#### @Enumerated(EnumType.STRING) 어노테이션에 대해서
+@Enumerated 어노테이션은 JPA로 데이터베이스를 저장할 때 Enum 값을 어떤 형태로 저장할지를 결정하는 어노테이션이다. 기본적으로는 int형의 숫자가 저장되는데, 숫자로 저장되면 해당 값의 의미를 알 수 없게 되기에 EnumType.STRING 설정을 주어 문자열로 저장될 수 있도록 선언해주면 된다.
+
+#### 권한 코드
+Spring Security에서는 권한 코드에 항상 ROLE_ 라는 프리픽스가 붙어야 한다. 코드별 키 값을 ROLE_GUSET, ROLE_USER, ROLE_ADMIN 등으로 지정할 수 있다.
+
+#### Spring Security Setting
+1. 스프링 시큐리티에서 소셜 기능을 구현하기 위해서 `spring-boot-starter-oauth-client` 라는 의존성을 추가한다.
+2. Security 관련 클래스들은 하나의 Package에서 관리하는 것이 좋을 수 있다.
+
+#### SecurityConfig
+- @EnableWebSecurity: Spring Security의 설정들을 활성화시켜 준다.
+- csrf().disable().headers().frameOptions().disable(): h2-console 화면을 사용하기 위해 해당 옵션들을 비활성화한다.
+- authorizeRequests: URL 별로 권한을 관리하는 옵션이다. authorizeRequests가 선언되어야만 antMatchers 옵션을 사용할 수 있다.
+- antMatchers: 권한 관리 대상을 지정하는 옵션이다. URL, HTTP 메소드별로 관리할 수 있다.
+- anyRequest: antMatchers에서 설정된 값들 이외의 나머지 URL들을 나나탠다. authenticated() 옵션을 추가하여 나머지 URL들은 인증된 사용자들에게만 허용하도록 설정할 수 있다.
+- logout().logOutSeccessUrl("/"): 로그아웃 기능에 대한 설정이다. 로그아웃이 성공한다면 "/" 주소로 이동한다.
+- oauth2Login: OAuth2 로그인 기능에 대한 설정이다.
+- userInfoEndpoint: OAuth2 로그인 이후 사용자 정보를 가져올 때의 설정들을 담당한다.
+- userService: 소셜 로그인 설공시 후속 조치를 진행할 UserService 인터페이스의 구현체를 등록한다. 리소스 서버, 즉 소셜 서비스에서 사용자 정보를 가져온 상태에서 추갈호 진행할 기능을 명시할 수 있다.
+
+#### CustomOAuth2UserService
+- registrationId: 현재 로그인 중인 서비스를 구분하는 코드이다. 구글, 카카오 네이버 로그인 등을 구분하기 위해 사용한다.
+- userNameAttributeName: OAuth2 로그인시 키가되는 필드값을 설정한다. 구글의 경우는 기본값으로 sub라는 값을 지원하지만 카카오나 네이버는 지원하지 않는다.
+- OAuthAttributes: OAuth2UserService를 통해 가져온 OAuth2User의 attribute를 담을 클래스이다.
+- SessionUser: 세션에 사용자 정보를 담기위한 DTO 클래스이다.
+
+#### OAuthAttributes
+- of(): OAuth2User에서 반환하는 사용자 정보는 Map이기 때문에 값 하나하나를 변환해서 사용한다.
+
+#### SessionUser
+- 세션에는 인증된 사용자 정보만 필요하고 그 외 정보들은 필요하지 않다.
+
+#### User 클래스를 사용하면 안되는 이유
+만약 사용자 관련 Entity인 User 클래스를 사용했다면 직렬화를 구현하지 않았기 때문에 에러가 발생하게 된다.
+하지만 이 에러를 해결하기 위해 User 클래스에 직렬화 코드를 삽입하는 것은 바람직 하지 않다. 
+
+Entity 클래스에 직렬화 코드를 넣는다면 성능 이슈, 부수 효과가 발생할 확률이 높다. 
+그래서 별도로 직렬화 기능을 가지는 DTO 클래스를 만들어 사용하는 것이 이후 운영이나 유지보수에 더 도움이 된다. 
+
+### 3. 어노테이션 기반으로 개선하기 
+같은 코드가 반복된다면 이후 수정이 필요할 때 모든 부분을 하나씩 찾아가며 수정해야만 한다.
+
+우리가 작성한 코드에서 예를 들자면 세션값을 가져오는 부분이 있다.
+이 부분을 메소드 인자로 세션값을 바로 받을 수 있도록 변경한다면 중복 코드를 줄일 수 있게 된다.
+
+- @Interface: 해당 어노테이션이 붙은 클래스는 어노테이션 클래스 지정된다.
+
+### 4. 데이터베이스를 세션 저장소로 사용하기
+앞서 만든 애플리케이션의 경우 서버를 재시작할 경우 **세션이 내장 톰캣의 메모리에 저장**되기 때문에 로그인이 풀리게 된다. 
+세션은 기본적으로 실행되는 WAS의 메모리에 저장되고 호출되는데 메모리에 저장되다 보니 내장 톰캣처럼 애플리케이션을 실행될 때 항상 초기화가 된다.
+
+그래서 세션을 유지하기 위해서는 다음과 같은 방법을 사용해야 한다.
+- 톰캣 세션 사용
+  - 기본으로 사용할 수 있는 방법인데, 2대 이상의 WAS 환경에서는 톰캣들간의 추가 설정이 필요하다.
+- 데인터베이스를 세션저장소로 사용
+  - 여러 WAS들 간의 공용 세션을 사용할 수 있는 가장 쉬운 방법이다. 다만, 로그인 요청이 많아진다면 성능상 이슈가 발생할 수 있다.
+  - 보통 로그인 요청이 적은 사내 백오피스 등의 환경에서 사용한다.
+- Redis, Memcached와 같은 메모리 DB를 세션저장소로 사용
+  - B2C 서비스에서 가장 많이 사용되는 방법이다.
+  - 실제 서비스로 사용하기 위해서는 Embedded Redis와 같은 방싯이 아닌 외부 메모리 서버가 필요하다.
+
+> AWS에서 해당 서비스를 배포하고 운영할 때 Redis와 같은 메모리 DB를 사용하려고 하면 비용이 부담될 수 있기 때문에
+학습 수준에서는 데이터베이스를 세션 저장소로 사용하는 것이 쉽고 간단하다. 
+
+### 5. 테스트에 시큐리티 적용하기
+#### CustomOAuth2UserSerivce를 찾을 수 없는 문제
+해당 문제가 발생한 원인은 CustomOauth2UserService를 생성하는데 필요한 소셜 로그인 관련 설정값들이 없기 때문이다.
+그래서 src/main과 src/test 디렉토리 환경을 동일하게 맞춰주기 위해서 test/resources 디렉토리에 application.yaml 설정 파일을 동일하게 두어야 한다.
+
+#### 302 Status Code 문제
+응답의 결과로 302 Code(리다이렉션 응답)가 반환되어 실패했는데, 스프링 시큐리티 설정으로 인해 인증되지 않은 사용자의 요청은 이동시키기 때문이다.
+그래서 API 요청은 임의로 인증된 사용자로 추가하여 테스트해야 한다. 이는 spring-security-test 라는 스프링 시큐리티 테스트 도구를 추가하고 @WithMockUser 어노테이션을 사용하여 해결할 수 있다.
+> @WithMockUser 어노테이션은 `@WithMockUser(roles="USER")` 와 같은 형식으로 작성할 수 있다.
+인증된 가짜 사용자를 만들어서 사용하게 되는데, roles에 권한을 추가할 수 있다. 해당 어노테이션을 통해 ROLE_USER 권한을 가지는 사용자가 API를 요청하는 것과 동일한 효과를 볼 수 있다.
+
+#### @WebMvcTest에서 CustomOAuth2UserService를 찾을 수 없는 문제
+@WebMvcTest는 CustomOAuth2UserService를 스캔하지 않기 떄문에 해당 문제가 발생한다.
+@WebMvcTest는 WebSecurityConfigurerAdapter, WebMvcConfigurer를 비롯한 @ControllerAdvice, @Controller를 스캔한다.
+@Repository, @Service, @Component는 스캔하지 않는다. 그래서 SecurityConfig를 생성하기 위해 필요한 CustomOAuth2UserService는 스캔할 수 없는 것이다.
+
+이 문제를 해결하기 위해서는 SecurityConfig를 스캔 대상에서 제외시키면 된다.
