@@ -277,3 +277,10 @@ Entity 클래스에 직렬화 코드를 넣는다면 성능 이슈, 부수 효�
 @Repository, @Service, @Component는 스캔하지 않는다. 그래서 SecurityConfig를 생성하기 위해 필요한 CustomOAuth2UserService는 스캔할 수 없는 것이다.
 
 이 문제를 해결하기 위해서는 SecurityConfig를 스캔 대상에서 제외시키면 된다.
+
+<br><br><br>
+
+## Chapter 06
+### 1. AWS EC2 인스턴스 생성하기
+### 2. EC2 서버에 접속하기
+### 3. 아마존 리눅스 서버 생성할 때 고려사항
